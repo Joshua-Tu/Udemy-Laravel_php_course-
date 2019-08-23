@@ -1,6 +1,12 @@
 <?php
 
 use App\Post;
+use App\User;
+use App\Country;
+use App\Photo;
+use App\Tag;
+use Illuminate\Support\Facades\Cache;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -99,6 +105,7 @@ Route::get('/basicinsert', function() {
    $post->save();
 });
 
+//Eloquent Create
 Route::get('/basicinsert2', function() {
    $post = Post::find(2);
    $post->title = 'new Eloquent title insert 2';
@@ -164,4 +171,98 @@ Route::get('/forcedelete', function() {
    Post::onlyTrashed()->where('is_admin', 0)->forceDelete();
 
 });
+
+/**
+ * Eloquent Relationship
+ */
+//One to one Relationship
+ //hasOne
+Route::get('/user/{id}/post', function($id) {
+   //return User::find($id)->post;
+   return User::find($id)->post;
+});
+//belongs to
+Route::get('/post/{id}/user', function($id){
+   return Post::find($id)->user->name;
+});
+
+//One to many
+Route::get('/posts', function() {
+   $user = User::find(1);
+   
+   foreach($user->posts as $post) {
+      echo $post->title . "</br>";
+   }
+});
+
+
+//Many to many
+Route::get('/user/{id}/role', function($id){
+   //$user = User::find($id);
+   // foreach($user->roles as $role) {
+   //    echo $role->name;
+   // }
+   
+   $user = User::find($id)->roles()->orderBy('id','desc')->get();   
+   return $user;
+});
+
+//Accessing the intermediate table / pivot
+Route::get('/user/pivot', function() {
+   $user = User::find(1);
+   foreach($user->roles as $role) {
+      echo $role->pivot->updated_at;
+   }
+});
+// this will return {"user_id":1,"role_id":1}
+
+
+//hasManyThrough
+Route::get('/user/country', function() {
+   $country = Country::find(4);
+   foreach ($country->posts as $post) {
+      return $post->content;
+   }
+});
+
+//polymorphic relations
+$router->get('/user/photos', function() {
+   $user = User::find(1);
+   foreach($user->photos as $photo) {
+      return $photo->path;
+   }
+});
+
+$router->get('/post/photos', function() {
+   $post = Post::find(1);
+   foreach($post->photos as $photo) {
+      // return $photo->path;
+      echo $photo->path."<br/>";
+   }
+});
+
+$router->get('photo/{id}', function ($id) {
+   $photo = Photo::findOrFail($id);
+   return $photo->imageable;
+});
+
+//polymorphic many to many
+$router->get('/post/tag', function() {
+   $post = Post::find(1);
+   
+   foreach($post->tags as $tag) {
+      echo $tag->name;
+   }
+});
+
+$router->get('/tag/post/', function () {
+   $tag = Tag::find(2);
+   return $tag->posts;
+   // foreach($tag->posts as $post) {
+   //    echo $post->title;
+   // }
+});
+
+
+
 
