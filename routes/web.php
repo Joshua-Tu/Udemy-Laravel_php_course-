@@ -187,13 +187,13 @@ Route::get('/post/{id}/user', function($id){
 });
 
 //One to many
-Route::get('/posts', function() {
-   $user = User::find(1);
+// Route::get('/posts', function() {
+//    $user = User::find(1);
    
-   foreach($user->posts as $post) {
-      echo $post->title . "</br>";
-   }
-});
+//    foreach($user->posts as $post) {
+//       echo $post->title . "</br>";
+//    }
+// });
 
 
 //Many to many
@@ -264,5 +264,8 @@ $router->get('/tag/post/', function () {
 });
 
 
+//CRUD Application
+
+Route::resource('/posts', 'PostsController');
 
 
